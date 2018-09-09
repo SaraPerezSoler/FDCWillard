@@ -50,3 +50,17 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Eclipse data
+.project
+
+# Scons data
+.sconsign.dblite
+/Default/
+/Debug/
+
+# Python cache
+__pycache__
+
+# Build folder
+obj
