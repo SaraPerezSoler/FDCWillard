@@ -15,4 +15,11 @@ typedef struct{
 
 } FDC_GameEngine;
 
+/**
+ * @brief Run the main loop.
+ *
+ * @param self Game engine.
+ */
+void FDC_GameEngine_mainLoop(FDC_GameEngine * self);
+
 #endif /* INCLUDE_FDC_GAMEENGINE_H_ */

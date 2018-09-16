@@ -3,9 +3,11 @@
  * @brief Main file.
  */
 
-#include <stdio.h>
+#include "FDC_GameEngine.h"
 
 int main(int argc, char **argv)
 {
-	printf("Hello world\n");
+	FDC_GameEngine engine;
+
+	FDC_GameEngine_mainLoop(&engine);
 }
