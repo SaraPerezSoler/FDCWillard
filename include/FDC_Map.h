@@ -13,7 +13,7 @@
  * @brief Map information.
  */
 typedef struct{
-	FDC_TileDataGrid tiles;
+	FDC_TileDataGrid tiles; //!< Tile information
 } FDC_Map;
 
 #endif /* INCLUDE_FDC_MAP_H_ */
