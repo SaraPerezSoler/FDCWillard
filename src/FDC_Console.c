@@ -4,6 +4,7 @@
  */
 
 #include "FDC_Console.h"
+#include "FDC_String.h"
 #include <stdio.h>
 #ifdef _WIN32
 #include "windows.h"
@@ -17,7 +18,21 @@
 FDC_Error FDC_Console_init(FDC_Console * self)
 {
 #ifdef _WIN32
-	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	self->active_buffer = INVALID_HANDLE_VALUE;
+
+	AllocConsole(); /* If this call fails, and the process does not have a
+	                   console, CreateFileA will return an error */
+
+	HANDLE hOut = CreateFileA(
+		"CONOUT$",
+		GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_WRITE,
+		NULL, /* Do not inherit */
+		OPEN_EXISTING,
+		0, /* Ignored */
+		INVALID_HANDLE_VALUE /* Ignored */
+	);
 	if (hOut == INVALID_HANDLE_VALUE)
 	{
 		//return GetLastError();
@@ -49,6 +64,11 @@ FDC_Error FDC_Console_init(FDC_Console * self)
 FDC_Error FDC_Console_destroy(FDC_Console * self)
 {
 #ifdef _WIN32
+
+	CloseHandle(self->active_buffer);
+	self->active_buffer = INVALID_HANDLE_VALUE;
+
+	return FDC_OK;
 #else
 	abort();
 #endif
@@ -57,7 +77,22 @@ FDC_Error FDC_Console_destroy(FDC_Console * self)
 FDC_Error FDC_ConsoleBuffer_write(FDC_ConsoleBuffer * self, size_t size, char text[size])
 {
 #ifdef _WIN32
-	//WriteConsole();
+
+	char16_t u16_buffer[FDC_STRING_U8_TO_U16_SIZE(size)];
+	size_t u16_size;
+
+	FDC_Error error = FDC_String_u8_to_u16(size, text, sizeof(u16_buffer), u16_buffer, &u16_size);
+	if(error != FDC_OK)
+	{
+		return error;
+	}
+
+	if(!WriteConsoleW(self, u16_buffer, u16_size, NULL, NULL))
+	{
+		FDC_ERROR_RAISE_LITERAL(FDC_ERROR_UNKNOWN, "Unable to write to the console buffer");
+	}
+
+	return FDC_OK;
 #else
 	abort();
 #endif

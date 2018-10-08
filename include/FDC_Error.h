@@ -18,11 +18,11 @@
 /**
  * @brief Compact representation of an error.
  */
-typedef struct FDC_Error {
+typedef struct FDC_ErrorStruct {
 	char * id; //!< Error id.
 	char * name; //!< Error display name.
-	const struct FDC_Error * parent; //!< Parent of the error.
-	const struct FDC_Error * next; //!< Next error in the nested list of errors.
+	const struct FDC_ErrorStruct * parent; //!< Parent of the error.
+	const struct FDC_ErrorStruct * next; //!< Next error in the nested list of errors.
 } FDC_ErrorStruct;
 
 /**
