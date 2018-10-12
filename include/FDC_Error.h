@@ -9,6 +9,7 @@
 #define INCLUDE_FDC_ERROR_H_
 
 #include <stddef.h>
+#include <stdarg.h>
 
 /**
  * @brief Size of the memory reserved for each thread error messages.
@@ -69,6 +70,7 @@ extern _Thread_local FDC_ErrorMessage FDC_error_message;
 extern const FDC_Error FDC_OK; //!< No error has occurred.
 extern const FDC_Error FDC_ERROR_UNKNOWN; //!< Unknown error.
 extern const FDC_Error FDC_ERROR_NOMEMORY; //!< No memory error.
+extern const FDC_Error FDC_ERROR_PARAM; //!< Invalid parameter.
 
 /**
  * @brief Clean the error message.
@@ -87,12 +89,30 @@ void FDC_ErrorMessage_clean(FDC_ErrorMessage * self);
 void FDC_ErrorMessage_append(FDC_ErrorMessage * self, size_t msg_size, char msg[msg_size]);
 
 /**
+ * @brief Append a formatted text to an error message.
+ *
+ * @param self Message to append text to. If NULL, is the thread-local one.
+ * @param format_str Format string.
+ * @param v Argument list.
+ */
+void FDC_ErrorMessage_vappendFormatted(FDC_ErrorMessage * self, char * format_str, va_list v);
+
+/**
+ * @brief Append a formatted text to an error message.
+ *
+ * @param self Message to append text to. If NULL, is the thread-local one.
+ * @param format_str Format string.
+ */
+__attribute__ ((format (gnu_printf, 2, 3)))
+void FDC_ErrorMessage_appendFormatted(FDC_ErrorMessage * self, char * format_str, ...);
+
+/**
  * @brief Raise an error.
  */
-#define FDC_ERROR_RAISE(ERROR, SIZE, MSG) \
+#define FDC_ERROR_RAISE(ERROR, FORMAT, ...) \
 		do { \
 			FDC_ErrorMessage_clean(NULL); \
-			FDC_ErrorMessage_append(NULL, SIZE, MSG);\
+			FDC_ErrorMessage_appendFormatted(NULL, FORMAT, __VA_ARGS__);\
 			return ERROR; \
 		} while(0)
 
@@ -100,6 +120,10 @@ void FDC_ErrorMessage_append(FDC_ErrorMessage * self, size_t msg_size, char msg[
  * @brief Raise an error with a literal msg.
  */
 #define FDC_ERROR_RAISE_LITERAL(ERROR, MSG) \
-		FDC_ERROR_RAISE(ERROR, sizeof(MSG), MSG)
+		do { \
+			FDC_ErrorMessage_clean(NULL); \
+			FDC_ErrorMessage_append(NULL, sizeof(MSG), MSG);\
+			return ERROR; \
+		} while(0)
 
 #endif /* INCLUDE_FDC_ERROR_H_ */

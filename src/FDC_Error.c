@@ -9,6 +9,7 @@ FDC_Error FDC_ERROR_LIST = NULL;
 const FDC_Error FDC_OK = NULL;
 FDC_ERROR_CREATE(FDC_ERROR_UNKNOWN, u8"Unknown error", NULL);
 FDC_ERROR_CREATE(FDC_ERROR_NOMEMORY, u8"Not enough memory", NULL);
+FDC_ERROR_CREATE(FDC_ERROR_PARAM, u8"Invalid parameter", NULL);
 
 void FDC_ErrorMessage_clean(FDC_ErrorMessage * self)
 {
@@ -40,4 +41,35 @@ void FDC_ErrorMessage_append(FDC_ErrorMessage * self, size_t msg_size, char msg[
 	self->buffer[new_size] = '\0';
 
 	self->size_used = new_size;
+}
+
+void FDC_ErrorMessage_vappendFormatted(FDC_ErrorMessage * self, char * format_str, va_list v)
+{
+	va_list v_copy;
+
+	va_copy(v_copy, v);
+
+	int len = vsnprintf(NULL, 0, format_str, v);
+	if(len < 0)
+	{
+		fprintf(stderr, "Error in vsnprintf\n");
+		va_end(v_copy);
+		return;
+	}
+
+	char buffer[len+1];
+	vsnprintf(buffer, len+1, format_str, v_copy);
+
+	va_end(v_copy);
+
+	FDC_ErrorMessage_append(self, len, buffer);
+}
+
+void FDC_ErrorMessage_appendFormatted(FDC_ErrorMessage * self, char * format_str, ...)
+{
+	va_list v;
+
+	va_start(v, format_str);
+	FDC_ErrorMessage_vappendFormatted(self, format_str, v);
+	va_end(v);
 }
